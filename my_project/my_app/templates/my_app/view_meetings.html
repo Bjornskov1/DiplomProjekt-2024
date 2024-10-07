@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Meetings</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .meeting-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .meeting-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            background-color: #f9f9f9;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .meeting-name {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .meeting-details {
+            color: #555;
+            font-size: 1em;
+        }
+        .actions {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Current Meetings</h1>
+    <ul class="meeting-list">
+        {% for meeting in meetings %}
+            <li class="meeting-card">
+                <div class="meeting-name">{{ meeting.name }}</div>
+                <div class="meeting-details">
+                    On {{ meeting.date|date:"F d, Y" }} from {{ meeting.start_time|time:"g:i A" }} to {{ meeting.end_time|time:"g:i A" }}
+                </div>
+            </li>
+        {% empty %}
+            <li>No meetings scheduled.</li>
+        {% endfor %}
+    </ul>
+
+    <div class="actions">
+        <a href="{% url 'home' %}" class="button">Back to Home</a>
+        <a href="{% url 'clear_meetings' %}" class="button" style="background-color: red;">Clear All Meetings</a>
+    </div>
+</body>
+</html>
