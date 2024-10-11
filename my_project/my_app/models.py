@@ -8,9 +8,17 @@ class Meeting(models.Model):
         ('GH', 'GH'),
     ]
 
+    ROOM_CHOICES = [
+        ('Møderum 1', 'Møderum 1'),
+        ('Møderum 2', 'Møderum 2'),
+    ]
+
     name = models.CharField(max_length=100, choices=INITIAL_CHOICES)
     date = models.DateField()
-    start_time = models.TimeField()  # Make sure this is present
-    end_time = models.TimeField()    # Make sure this is present
+    start_time = models.TimeField()
+    end_time = models.TimeField()
     duration = models.CharField(max_length=20)
-    notes = models.CharField(max_length=100, null=True)  # Temporary field
+    room = models.CharField(max_length=20, choices=ROOM_CHOICES)
+
+    def __str__(self):
+        return f'{self.name} on {self.date} at {self.start_time} in {self.room}'

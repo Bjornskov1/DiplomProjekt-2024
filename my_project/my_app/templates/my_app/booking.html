@@ -78,7 +78,6 @@
     <form method="POST">
         {% csrf_token %}
 
-        <!-- Replace Meeting Name input with a scrollable dropdown -->
         <label for="name">Select Initials:</label>
         <select name="name" required>
             <option value="AB">AB</option>
@@ -99,6 +98,13 @@
             <option value="30 minutes">30 Minutes</option>
             <option value="60 minutes">60 Minutes</option>
             <option value="Whole Day">Whole Day</option>
+        </select><br><br>
+
+        <!-- Room Selection -->
+        <label for="room">Select Meeting Room:</label>
+        <select name="room" required>
+            <option value="Møderum 1">Møderum 1</option>
+            <option value="Møderum 2">Møderum 2</option>
         </select><br><br>
 
         <button type="submit">Add Meeting</button>

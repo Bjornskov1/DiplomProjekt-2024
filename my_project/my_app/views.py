@@ -10,17 +10,15 @@ def home(request):
 
 def book_meeting(request):
     if request.method == 'POST':
-        # Now name refers to selected initials from the dropdown
         name = request.POST['name']
-        date_str = request.POST['date']  # The date is coming as a string
-        start_time_str = request.POST['start_time']  # The time is coming as a string
+        date_str = request.POST['date']
+        start_time_str = request.POST['start_time']
         duration = request.POST['duration']
+        room = request.POST['room']  # Capture room selection
 
-        # Convert date and start_time strings to date and time objects
         date = datetime.strptime(date_str, '%Y-%m-%d').date()
         start_time = datetime.strptime(start_time_str, '%H:%M').time()
 
-        # Calculate the end time based on duration
         start_datetime = datetime.combine(date, start_time)
 
         if duration == '15 minutes':
@@ -30,27 +28,26 @@ def book_meeting(request):
         elif duration == '60 minutes':
             end_datetime = start_datetime + timedelta(minutes=60)
         else:
-            end_datetime = start_datetime  # If whole day or invalid, assume no end time
+            end_datetime = start_datetime
 
         end_time = end_datetime.time()
 
-        # Check for overlapping meetings
+        # Check for overlapping meetings in the same room
         overlapping_meetings = Meeting.objects.filter(
             date=date,
             start_time__lt=end_time,
-            end_time__gt=start_time
+            end_time__gt=start_time,
+            room=room  # Only check for conflicts in the same room
         )
 
         if overlapping_meetings.exists():
-            # Add an error message to prompt the user
-            messages.error(request, 'This time slot is already taken. Please choose a different time.')
+            messages.error(request, 'This time slot is already taken in the selected room. Please choose a different time or room.')
             return render(request, 'my_app/booking.html')
 
         # Save the new meeting
-        new_meeting = Meeting(name=name, date=date, start_time=start_time, end_time=end_time, duration=duration)
+        new_meeting = Meeting(name=name, date=date, start_time=start_time, end_time=end_time, duration=duration, room=room)
         new_meeting.save()
 
-        # Show a success message when a meeting is successfully booked
         messages.success(request, 'Meeting booked successfully!')
         return redirect('view_meetings')
 

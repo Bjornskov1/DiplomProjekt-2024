@@ -66,7 +66,7 @@
             <li class="meeting-card">
                 <div class="meeting-name">{{ meeting.name }}</div>
                 <div class="meeting-details">
-                    On {{ meeting.date|date:"F d, Y" }} from {{ meeting.start_time|time:"g:i A" }} to {{ meeting.end_time|time:"g:i A" }}
+                    On {{ meeting.date|date:"F d, Y" }} from {{ meeting.start_time|time:"g:i A" }} to {{ meeting.end_time|time:"g:i A" }} in {{ meeting.room }}
                 </div>
             </li>
         {% empty %}
