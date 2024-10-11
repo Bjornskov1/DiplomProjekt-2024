@@ -5,22 +5,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Django Pi Project</title>
-    <!-- Correct CSS reference -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
         body {
             text-align: center;
             margin: 50px;
+            font-size: 24px; /* Larger font for touch-friendly */
         }
         .button {
             display: inline-block;
-            padding: 20px 40px;
-            font-size: 24px;
+            padding: 30px 60px; /* Larger padding for touch */
+            font-size: 32px; /* Larger font size */
             margin: 20px;
             background-color: #007BFF;
             color: white;
             text-decoration: none;
             border-radius: 5px;
+            width: 100%;  /* Full width button for easy tap */
+            max-width: 400px; /* Limit width for aesthetics */
+            text-align: center;
         }
         .button:hover {
             background-color: #0056b3;

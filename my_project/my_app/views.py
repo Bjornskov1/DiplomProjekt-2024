@@ -10,6 +10,7 @@ def home(request):
 
 def book_meeting(request):
     if request.method == 'POST':
+        # Now name refers to selected initials from the dropdown
         name = request.POST['name']
         date_str = request.POST['date']  # The date is coming as a string
         start_time_str = request.POST['start_time']  # The time is coming as a string

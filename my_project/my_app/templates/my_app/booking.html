@@ -7,9 +7,13 @@
     <title>Book a New Meeting</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
+        body {
+            font-size: 18px;
+            padding: 20px;
+        }
         .message {
             border: 1px solid #ccc;
-            padding: 10px;
+            padding: 20px;
             margin-bottom: 20px;
         }
         .error {
@@ -19,6 +23,41 @@
         .success {
             color: green;
             background-color: #dfd;
+        }
+        label, select, input {
+            font-size: 24px; /* Larger for touch screen */
+            margin-bottom: 20px;
+        }
+        input, select {
+            width: 100%;  /* Take full width */
+            padding: 15px;
+        }
+        button {
+            font-size: 24px; /* Larger button for touch */
+            padding: 20px 40px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        a {
+            display: inline-block;
+            font-size: 24px;
+            padding: 20px 40px;
+            margin-top: 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        a:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -38,8 +77,15 @@
 
     <form method="POST">
         {% csrf_token %}
-        <label for="name">Meeting Name:</label>
-        <input type="text" name="name" required><br><br>
+
+        <!-- Replace Meeting Name input with a scrollable dropdown -->
+        <label for="name">Select Initials:</label>
+        <select name="name" required>
+            <option value="AB">AB</option>
+            <option value="CD">CD</option>
+            <option value="EF">EF</option>
+            <option value="GH">GH</option>
+        </select><br><br>
 
         <label for="date">Date:</label>
         <input type="date" name="date" required><br><br>

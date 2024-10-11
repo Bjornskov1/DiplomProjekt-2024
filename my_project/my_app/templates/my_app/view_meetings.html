@@ -7,6 +7,10 @@
     <title>Current Meetings</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
+        body {
+            font-size: 24px; /* Larger font size for touch */
+            padding: 20px;
+        }
         .meeting-list {
             list-style-type: none;
             padding: 0;
@@ -14,21 +18,44 @@
         .meeting-card {
             border: 1px solid #ddd;
             border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
+            padding: 20px;
+            margin: 20px 0;
             background-color: #f9f9f9;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 24px; /* Larger text */
         }
         .meeting-name {
             font-weight: bold;
-            font-size: 1.2em;
+            font-size: 1.6em;
         }
         .meeting-details {
             color: #555;
-            font-size: 1em;
+            font-size: 1.2em;
         }
         .actions {
             margin-top: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 30px 60px;
+            font-size: 28px;
+            margin: 10px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .button.red {
+            background-color: red;
+        }
+        .button.red:hover {
+            background-color: darkred;
         }
     </style>
 </head>
@@ -49,7 +76,7 @@
 
     <div class="actions">
         <a href="{% url 'home' %}" class="button">Back to Home</a>
-        <a href="{% url 'clear_meetings' %}" class="button" style="background-color: red;">Clear All Meetings</a>
+        <a href="{% url 'clear_meetings' %}" class="button red">Clear All Meetings</a>
     </div>
 </body>
 </html>
