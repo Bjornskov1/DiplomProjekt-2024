@@ -4,7 +4,7 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book a New Meeting</title>
+    <title>Edit Meeting</title>
 
     <!-- Flatpickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -68,7 +68,7 @@
     </style>
 </head>
 <body>
-    <h1>Book a New Meeting</h1>
+    <h1>Edit Meeting</h1>
 
     <!-- Display messages -->
     {% if messages %}
@@ -86,36 +86,36 @@
 
         <label for="name">Select Initials:</label>
         <select name="name" required>
-            <option value="AB">AB</option>
-            <option value="CD">CD</option>
-            <option value="EF">EF</option>
-            <option value="GH">GH</option>
+            <option value="AB" {% if meeting.name == "AB" %}selected{% endif %}>AB</option>
+            <option value="CD" {% if meeting.name == "CD" %}selected{% endif %}>CD</option>
+            <option value="EF" {% if meeting.name == "EF" %}selected{% endif %}>EF</option>
+            <option value="GH" {% if meeting.name == "GH" %}selected{% endif %}>GH</option>
         </select><br><br>
 
         <label for="date">Date:</label>
-        <input type="date" name="date" required><br><br>
+        <input type="date" name="date" value="{{ meeting.date|date:'Y-m-d' }}" required><br><br>
 
         <label for="start_time">Start Time:</label>
-        <input type="text" name="start_time" required><br><br> <!-- Changed to text for Flatpickr -->
+        <input type="text" name="start_time" value="{{ meeting.start_time|time:'H:i' }}" required><br><br> <!-- Changed to text -->
 
         <label for="duration">Duration:</label>
         <select name="duration" required>
-            <option value="15 minutes">15 Minutes</option>
-            <option value="30 minutes">30 Minutes</option>
-            <option value="60 minutes">60 Minutes</option>
-            <option value="Whole Day">Whole Day</option>
+            <option value="15 minutes" {% if meeting.duration == "15 minutes" %}selected{% endif %}>15 Minutes</option>
+            <option value="30 minutes" {% if meeting.duration == "30 minutes" %}selected{% endif %}>30 Minutes</option>
+            <option value="60 minutes" {% if meeting.duration == "60 minutes" %}selected{% endif %}>60 Minutes</option>
+            <option value="Whole Day" {% if meeting.duration == "Whole Day" %}selected{% endif %}>Whole Day</option>
         </select><br><br>
 
         <label for="room">Select Meeting Room:</label>
         <select name="room" required>
-            <option value="Møderum 1">Møderum 1</option>
-            <option value="Møderum 2">Møderum 2</option>
+            <option value="Møderum 1" {% if meeting.room == "Møderum 1" %}selected{% endif %}>Møderum 1</option>
+            <option value="Møderum 2" {% if meeting.room == "Møderum 2" %}selected{% endif %}>Møderum 2</option>
         </select><br><br>
 
-        <button type="submit">Add Meeting</button>
+        <button type="submit">Save Changes</button>
     </form>
 
-    <a href="{% url 'home' %}">Back to Home</a>
+    <a href="{% url 'view_meetings' %}">Back to Meetings</a>
 
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

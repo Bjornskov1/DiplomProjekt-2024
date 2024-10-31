@@ -45,3 +45,52 @@ button {
         margin: 10px 0;
     }
 }
+
+/* Flatpickr customization for touch screens */
+.flatpickr-time {
+    font-size: 28px !important; /* Increase the size of the time numbers */
+    padding: 10px !important;   /* Add padding around the whole time picker */
+    display: inline-flex;       /* Align items horizontally */
+    align-items: center;        /* Vertically center the elements */
+}
+
+.flatpickr-time input {
+    width: 150px !important; /* Set a reasonable width for the input box */
+    height: 50px !important; /* Adjust height for better visibility */
+    font-size: 24px !important; /* Increase font size for better readability */
+    text-align: center !important; /* Center-align the time numbers */
+    border-radius: 8px !important; /* Round corners for better touch interaction */
+    padding: 0px 10px !important; /* Add some padding to the input for spacing */
+    box-sizing: border-box; /* Make sure padding and width are handled properly */
+}
+
+.flatpickr-time .flatpickr-hour,
+.flatpickr-time .flatpickr-minute {
+    padding: 5px !important; /* Smaller padding for better alignment */
+    font-size: 28px !important; /* Large font for touch visibility */
+    height: 50px !important; /* Match the input height for consistency */
+    width: 60px !important; /* Keep the width consistent */
+    display: flex;
+    justify-content: center; /* Ensure the numbers are centered */
+    align-items: center;     /* Vertically center the numbers */
+}
+
+.flatpickr-time .flatpickr-prev-hour,
+.flatpickr-time .flatpickr-next-hour,
+.flatpickr-time .flatpickr-prev-minute,
+.flatpickr-time .flatpickr-next-minute {
+    font-size: 32px !important; /* Larger arrows for better touch targets */
+    padding: 5px !important; /* Keep padding small for better layout */
+    width: 50px !important; /* Adjust the arrow button size */
+    height: 50px !important; /* Adjust height to match other elements */
+    line-height: 50px !important; /* Ensure vertical alignment */
+}
+
+.flatpickr-time .flatpickr-am-pm {
+    display: none !important; /* Hide AM/PM since 24-hour format is used */
+}
+
+/* Optional: Adjust the calendar container if you are using it */
+.flatpickr-calendar {
+    font-size: 24px !important;
+}

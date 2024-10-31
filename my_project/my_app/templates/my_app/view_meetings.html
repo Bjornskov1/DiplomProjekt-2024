@@ -66,8 +66,11 @@
             <li class="meeting-card">
                 <div class="meeting-name">{{ meeting.name }}</div>
                 <div class="meeting-details">
-                    On {{ meeting.date|date:"F d, Y" }} from {{ meeting.start_time|time:"g:i A" }} to {{ meeting.end_time|time:"g:i A" }} in {{ meeting.room }}
+                     On {{ meeting.date|date:"F d, Y" }} from {{ meeting.start_time|time:"H:i" }} to {{ meeting.end_time|time:"H:i" }} in {{ meeting.room }}
                 </div>
+                <!-- Cancel and Edit buttons using meeting.name as primary key -->
+                <a href="{% url 'edit_meeting' meeting.name %}" class="button">Edit</a>
+                <a href="{% url 'cancel_meeting' meeting.name %}" class="button red">Cancel</a>
             </li>
         {% empty %}
             <li>No meetings scheduled.</li>
