@@ -8,63 +8,20 @@
 
     <!-- Flatpickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
-    <!-- Your existing CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
     <style>
-        body {
-            font-size: 18px;
-            padding: 20px;
-        }
-        .message {
-            border: 1px solid #ccc;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .error {
-            color: red;
-            background-color: #fdd;
-        }
-        .success {
-            color: green;
-            background-color: #dfd;
-        }
-        label, select, input {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        input, select {
-            width: 100%;
-            padding: 15px;
-        }
-        button {
-            font-size: 24px;
-            padding: 20px 40px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        a {
-            display: inline-block;
-            font-size: 24px;
-            padding: 20px 40px;
-            margin-top: 20px;
-            background-color: #007BFF;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            text-align: center;
-        }
-        a:hover {
-            background-color: #0056b3;
-        }
+        /* Additional inline styles matching booking page */
+        body { font-size: 18px; padding: 20px; }
+        .message { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; }
+        .error { color: red; background-color: #fdd; }
+        .success { color: green; background-color: #dfd; }
+        label, select, input { font-size: 24px; margin-bottom: 20px; }
+        input, select { width: 100%; padding: 15px; }
+        button { font-size: 24px; padding: 20px 40px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
+        button:hover { background-color: #218838; }
+        a { display: inline-block; font-size: 24px; padding: 20px 40px; margin-top: 20px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px; text-align: center; }
+        a:hover { background-color: #0056b3; }
     </style>
 </head>
 <body>
@@ -83,50 +40,23 @@
 
     <form method="POST">
         {% csrf_token %}
-
-        <label for="name">Select Initials:</label>
-        <select name="name" required>
-            <option value="AB" {% if meeting.name == "AB" %}selected{% endif %}>AB</option>
-            <option value="CD" {% if meeting.name == "CD" %}selected{% endif %}>CD</option>
-            <option value="EF" {% if meeting.name == "EF" %}selected{% endif %}>EF</option>
-            <option value="GH" {% if meeting.name == "GH" %}selected{% endif %}>GH</option>
-        </select><br><br>
-
-        <label for="date">Date:</label>
-        <input type="date" name="date" value="{{ meeting.date|date:'Y-m-d' }}" required><br><br>
-
-        <label for="start_time">Start Time:</label>
-        <input type="text" name="start_time" value="{{ meeting.start_time|time:'H:i' }}" required><br><br> <!-- Changed to text -->
-
-        <label for="duration">Duration:</label>
-        <select name="duration" required>
-            <option value="15 minutes" {% if meeting.duration == "15 minutes" %}selected{% endif %}>15 Minutes</option>
-            <option value="30 minutes" {% if meeting.duration == "30 minutes" %}selected{% endif %}>30 Minutes</option>
-            <option value="60 minutes" {% if meeting.duration == "60 minutes" %}selected{% endif %}>60 Minutes</option>
-            <option value="Whole Day" {% if meeting.duration == "Whole Day" %}selected{% endif %}>Whole Day</option>
-        </select><br><br>
-
-        <label for="room">Select Meeting Room:</label>
-        <select name="room" required>
-            <option value="Møderum 1" {% if meeting.room == "Møderum 1" %}selected{% endif %}>Møderum 1</option>
-            <option value="Møderum 2" {% if meeting.room == "Møderum 2" %}selected{% endif %}>Møderum 2</option>
-        </select><br><br>
+        {{ form.as_p }}  <!-- Render form fields directly -->
 
         <button type="submit">Save Changes</button>
     </form>
 
+    <!-- Navigation buttons with consistent style -->
     <a href="{% url 'view_meetings' %}">Back to Meetings</a>
+    <a href="{% url 'book_meeting' %}">Book New Meeting</a>
+    <a href="{% url 'home' %}">Back to Home</a>
 
-    <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-    <!-- Flatpickr Initialization -->
     <script>
         flatpickr("input[name='start_time']", {
             enableTime: true,
             noCalendar: true,
-            time_24hr: true,  // This enables 24-hour format
-            dateFormat: "H:i"  // Format: HH:MM
+            time_24hr: true,
+            dateFormat: "H:i"
         });
     </script>
 </body>

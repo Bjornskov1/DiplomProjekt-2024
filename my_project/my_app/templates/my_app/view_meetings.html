@@ -4,82 +4,139 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Current Meetings</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>View Meetings</title>
+
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
+
     <style>
         body {
-            font-size: 24px; /* Larger font size for touch */
+            font-size: 18px;
             padding: 20px;
         }
-        .meeting-list {
-            list-style-type: none;
-            padding: 0;
+        .message {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
         }
-        .meeting-card {
+        .error {
+            color: red;
+            background-color: #fdd;
+        }
+        .success {
+            color: green;
+            background-color: #dfd;
+        }
+        label, select, input {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .meeting-item {
             border: 1px solid #ddd;
-            border-radius: 10px;
             padding: 20px;
-            margin: 20px 0;
+            margin-bottom: 20px;
+            border-radius: 5px;
             background-color: #f9f9f9;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            font-size: 24px; /* Larger text */
         }
-        .meeting-name {
-            font-weight: bold;
-            font-size: 1.6em;
+        .meeting-item h3 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
         }
         .meeting-details {
+            margin-top: 10px;
+            font-size: 20px;
             color: #555;
-            font-size: 1.2em;
         }
-        .actions {
-            margin-top: 20px;
-        }
-        .button {
+        .action-buttons a, .action-buttons button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
             display: inline-block;
-            padding: 30px 60px;
-            font-size: 28px;
+        }
+        .action-buttons a:hover, .action-buttons button:hover {
+            background-color: #0056b3;
+        }
+        .cancel-button {
+            background-color: #dc3545;
+        }
+        .cancel-button:hover {
+            background-color: #c82333;
+        }
+        /* Style for the navigation buttons */
+        .navigation-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .navigation-buttons a {
+            font-size: 24px;
+            padding: 20px 40px;
             margin: 10px;
             background-color: #007BFF;
             color: white;
             text-decoration: none;
             border-radius: 5px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
+            display: inline-block;
         }
-        .button:hover {
+        .navigation-buttons a:hover {
             background-color: #0056b3;
-        }
-        .button.red {
-            background-color: red;
-        }
-        .button.red:hover {
-            background-color: darkred;
         }
     </style>
 </head>
 <body>
-    <h1>Current Meetings</h1>
-    <ul class="meeting-list">
-        {% for meeting in meetings %}
-            <li class="meeting-card">
-                <div class="meeting-name">{{ meeting.name }}</div>
-                <div class="meeting-details">
-                     On {{ meeting.date|date:"F d, Y" }} from {{ meeting.start_time|time:"H:i" }} to {{ meeting.end_time|time:"H:i" }} in {{ meeting.room }}
-                </div>
-                <!-- Cancel and Edit buttons using meeting.name as primary key -->
-                <a href="{% url 'edit_meeting' meeting.name %}" class="button">Edit</a>
-                <a href="{% url 'cancel_meeting' meeting.name %}" class="button red">Cancel</a>
-            </li>
-        {% empty %}
-            <li>No meetings scheduled.</li>
-        {% endfor %}
-    </ul>
+    <h1>View Meetings</h1>
 
-    <div class="actions">
-        <a href="{% url 'home' %}" class="button">Back to Home</a>
-        <a href="{% url 'clear_meetings' %}" class="button red">Clear All Meetings</a>
+    <!-- Display messages -->
+    {% if messages %}
+        <div class="message-container">
+            {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if meetings %}
+        {% for meeting in meetings %}
+            <div class="meeting-item">
+                <h3>Meeting with {{ meeting.user.name }}</h3>
+                <div class="meeting-details">
+                    <p><strong>Date:</strong> {{ meeting.date }}</p>
+                    <p><strong>Time:</strong> {{ meeting.start_time }} - {{ meeting.end_time }}</p>
+                    <p><strong>Duration:</strong> {{ meeting.duration }}</p>
+                    <p><strong>Room:</strong> {{ meeting.room }}</p>
+                </div>
+                <div class="action-buttons">
+                    {% if meeting.name %}
+                        <a href="{% url 'edit_meeting' meeting.name %}" class="edit-button">Edit</a>
+                        <form action="{% url 'cancel_meeting' meeting.name %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="cancel-button">Cancel</button>
+                        </form>
+                    {% else %}
+                        <span>Edit/Cancel not available</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No upcoming meetings scheduled.</p>
+    {% endif %}
+
+    <!-- Navigation Buttons -->
+    <div class="navigation-buttons">
+        <a href="{% url 'book_meeting' %}">Book a New Meeting</a>
+        <a href="{% url 'home' %}">Back to Home</a>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </body>
 </html>

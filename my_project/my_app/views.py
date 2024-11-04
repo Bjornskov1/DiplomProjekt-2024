@@ -1,8 +1,9 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect
-from .models import Meeting
+from .models import Meeting, User
 from datetime import datetime, timedelta
 from django.shortcuts import get_object_or_404
+from .forms import MeetingForm
 
 def home(request):
     return render(request, 'my_app/home.html')
@@ -10,56 +11,58 @@ def home(request):
 
 def book_meeting(request):
     if request.method == 'POST':
-        name = request.POST['name']
-        date_str = request.POST['date']
-        start_time_str = request.POST['start_time']
-        duration = request.POST['duration']
-        room = request.POST['room']
+        # Initialize the form with POST data
+        form = MeetingForm(request.POST)
 
-        date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        start_time = datetime.strptime(start_time_str, '%H:%M').time()
+        # Check if form data is valid
+        if form.is_valid():
+            # Save the meeting instance
+            new_meeting = form.save(commit=False)  # Get the instance without saving yet
 
-        # Check if the selected date is in the past
-        today = datetime.now().date()
-        if date < today:
-            messages.error(request, 'You cannot book a meeting for a past date.')
-            return render(request, 'my_app/booking.html')
+            # Check if the selected date is in the past
+            today = datetime.now().date()
+            if new_meeting.date < today:
+                messages.error(request, 'You cannot book a meeting for a past date.')
+                return render(request, 'my_app/booking.html', {'form': form})
 
-        start_datetime = datetime.combine(date, start_time)
+            # Calculate the end time based on duration
+            start_datetime = datetime.combine(new_meeting.date, new_meeting.start_time)
+            if new_meeting.duration == '15 minutes':
+                end_datetime = start_datetime + timedelta(minutes=15)
+            elif new_meeting.duration == '30 minutes':
+                end_datetime = start_datetime + timedelta(minutes=30)
+            elif new_meeting.duration == '60 minutes':
+                end_datetime = start_datetime + timedelta(minutes=60)
+            else:
+                end_datetime = start_datetime  # Default end time for "Whole Day"
 
-        # Calculate end time based on duration
-        if duration == '15 minutes':
-            end_datetime = start_datetime + timedelta(minutes=15)
-        elif duration == '30 minutes':
-            end_datetime = start_datetime + timedelta(minutes=30)
-        elif duration == '60 minutes':
-            end_datetime = start_datetime + timedelta(minutes=60)
-        else:
-            end_datetime = start_datetime
+            new_meeting.end_time = end_datetime.time()
 
-        end_time = end_datetime.time()
+            # Check for overlapping meetings in the same room
+            overlapping_meetings = Meeting.objects.filter(
+                date=new_meeting.date,
+                start_time__lt=new_meeting.end_time,
+                room=new_meeting.room
+            )
 
-        # Check for overlapping meetings in the same room
-        overlapping_meetings = Meeting.objects.filter(
-            date=date,
-            start_time__lt=end_time,
-            room=room
-        )
+            if overlapping_meetings.exists():
+                messages.error(
+                    request,
+                    'This time slot is already taken in the selected room. Please choose a different time or room.'
+                )
+                return render(request, 'my_app/booking.html', {'form': form})
 
-        if overlapping_meetings.exists():
-            messages.error(request,
-                           'This time slot is already taken in the selected room. Please choose a different time or room.')
-            return render(request, 'my_app/booking.html')
+            # Save the new meeting to the database
+            new_meeting.save()
+            messages.success(request, 'Meeting booked successfully!')
+            return redirect('view_meetings')
+    else:
+        # If GET request, create an empty form
+        form = MeetingForm()
 
-        # Save the new meeting
-        new_meeting = Meeting(name=name, date=date, start_time=start_time, end_time=end_time, duration=duration,
-                              room=room)
-        new_meeting.save()
-
-        messages.success(request, 'Meeting booked successfully!')
-        return redirect('view_meetings')
-
-    return render(request, 'my_app/booking.html')
+    # Fetch users from the database and pass to the template
+    users = User.objects.all()
+    return render(request, 'my_app/booking.html', {'form': form, 'users': users})
 
 
 def view_meetings(request):
@@ -81,23 +84,42 @@ def cancel_meeting(request, name):
     return redirect('view_meetings')
 
 
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Meeting, User
+from .forms import MeetingForm
+
 def edit_meeting(request, name):
-    # Fetch the meeting using the 'name' field as the primary key
+    # Retrieve the meeting using the unique name
     meeting = get_object_or_404(Meeting, name=name)
+    users = User.objects.all()  # Fetch all users for the dropdown list
 
     if request.method == 'POST':
-        # Update meeting details with the form data
-        meeting.date = request.POST['date']
-        meeting.start_time = request.POST['start_time']
-        meeting.duration = request.POST['duration']
-        meeting.room = request.POST['room']
-        meeting.save()
+        # Bind form with POST data to update meeting details
+        form = MeetingForm(request.POST, instance=meeting)
+        if form.is_valid():
+            # Save the updated meeting
+            updated_meeting = form.save(commit=False)
 
-        messages.success(request, 'Meeting updated successfully!')
-        return redirect('view_meetings')  # Redirect after successfully saving
+            # Calculate the end time based on duration, similar to booking
+            start_datetime = datetime.combine(updated_meeting.date, updated_meeting.start_time)
+            duration_mapping = {'15 minutes': 15, '30 minutes': 30, '60 minutes': 60}
+            end_datetime = start_datetime + timedelta(minutes=duration_mapping.get(updated_meeting.duration, 0))
+            updated_meeting.end_time = end_datetime.time()
 
-    # Render the form with the existing meeting data pre-filled
-    return render(request, 'my_app/edit_meeting.html', {'meeting': meeting})
+            updated_meeting.save()  # Save changes to the database
+            messages.success(request, 'Meeting updated successfully!')
+            return redirect('view_meetings')
+    else:
+        # Populate form with the existing meeting instance for GET requests
+        form = MeetingForm(instance=meeting)
+
+    return render(request, 'my_app/edit_meeting.html', {
+        'form': form,
+        'meeting': meeting,
+        'users': users  # Pass users to the template for user selection
+    })
+
 
 
 def clear_meetings(request):
