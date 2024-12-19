@@ -54,22 +54,20 @@ def book_meeting(request):
         if form.is_valid():
             new_meeting = form.save(commit=False)
 
-            # Valider og beregn slut-tidspunkt
+            # Validate and calculate the end time
             today = datetime.now().date()
             if new_meeting.date < today:
                 messages.error(request, 'You cannot book a meeting for a past date.')
-                return render(request, 'my_app/booking.html', {'form': form})
+                return render(request, 'my_app/booking.html', {'form': form, 'users': User.objects.all()})
 
             start_datetime = datetime.combine(new_meeting.date, new_meeting.start_time)
-            if new_meeting.duration == '15 minutes':
-                end_datetime = start_datetime + timedelta(minutes=15)
-            elif new_meeting.duration == '30 minutes':
-                end_datetime = start_datetime + timedelta(minutes=30)
-            elif new_meeting.duration == '60 minutes':
-                end_datetime = start_datetime + timedelta(minutes=60)
-            else:
-                end_datetime = start_datetime  # Default for "Whole Day"
-
+            duration_mapping = {
+                '15 minutes': 15,
+                '30 minutes': 30,
+                '60 minutes': 60,
+            }
+            duration_minutes = duration_mapping.get(new_meeting.duration, 0)
+            end_datetime = start_datetime + timedelta(minutes=duration_minutes)
             new_meeting.end_time = end_datetime.time()
 
             overlapping_meetings = Meeting.objects.filter(
@@ -79,15 +77,17 @@ def book_meeting(request):
             )
             if overlapping_meetings.exists():
                 messages.error(request, 'This time slot is already taken in the selected room.')
-                return render(request, 'my_app/booking.html', {'form': form})
+                return render(request, 'my_app/booking.html', {'form': form, 'users': User.objects.all()})
 
-            # Gem mødet og broadcast opdateringer
+            # Save the meeting and broadcast updates
             new_meeting.save()
             broadcast_meeting_update(new_meeting.room)
             messages.success(request, 'Meeting booked successfully!')
-            return redirect('view_meetings')
+            return redirect('home')
     else:
         form = MeetingForm()
+
+    # Always pass `users` to the template
     users = User.objects.all()
     return render(request, 'my_app/booking.html', {'form': form, 'users': users})
 
