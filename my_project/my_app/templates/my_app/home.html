@@ -13,10 +13,10 @@
             font-size: 24px; /* Larger font for touch-friendly */
         }
         .button {
-            display: inline-block;
+            display: block; /* Make buttons stack vertically */
             padding: 30px 60px; /* Larger padding for touch */
             font-size: 32px; /* Larger font size */
-            margin: 20px;
+            margin: 20px auto; /* Center buttons and add spacing */
             background-color: #007BFF;
             color: white;
             text-decoration: none;
@@ -33,7 +33,15 @@
 <body>
     <h1>Welcome to INIT AN Group!</h1>
     <h2>Please Choose an Option:</h2>
+
+    <!-- Button to Add Meeting -->
     <a href="{% url 'book_meeting' %}" class="button">Add Meeting</a>
+
+    <!-- Button to View Today's Meetings for Møderum 1 -->
+    <a href="{% url 'view_meetings_room_1' %}" class="button">Today's Meetings for Møderum 1</a>
+
+    <!-- Button to View Today's Meetings for Møderum 2 -->
+    <a href="{% url 'view_meetings_room_2' %}" class="button">Today's Meetings for Møderum 2</a>
 
 </body>
 </html>

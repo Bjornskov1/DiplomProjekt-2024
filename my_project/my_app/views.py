@@ -54,40 +54,49 @@ def book_meeting(request):
         if form.is_valid():
             new_meeting = form.save(commit=False)
 
-            # Validate and calculate the end time
+            # Validate date
             today = datetime.now().date()
             if new_meeting.date < today:
                 messages.error(request, 'You cannot book a meeting for a past date.')
                 return render(request, 'my_app/booking.html', {'form': form, 'users': User.objects.all()})
 
+            # Calculate end time based on duration
             start_datetime = datetime.combine(new_meeting.date, new_meeting.start_time)
             duration_mapping = {
                 '15 minutes': 15,
                 '30 minutes': 30,
                 '60 minutes': 60,
+                'Whole Day': 1440  # Whole day as minutes
             }
-            duration_minutes = duration_mapping.get(new_meeting.duration, 0)
-            end_datetime = start_datetime + timedelta(minutes=duration_minutes)
+            end_datetime = start_datetime + timedelta(minutes=duration_mapping.get(new_meeting.duration, 0))
             new_meeting.end_time = end_datetime.time()
 
-            overlapping_meetings = Meeting.objects.filter(
-                date=new_meeting.date,
-                start_time__lt=new_meeting.end_time,
-                room=new_meeting.room
-            )
+            # Overlap check
+            if new_meeting.duration == 'Whole Day':
+                overlapping_meetings = Meeting.objects.filter(
+                    date=new_meeting.date,
+                    room=new_meeting.room
+                )
+            else:
+                overlapping_meetings = Meeting.objects.filter(
+                    date=new_meeting.date,
+                    room=new_meeting.room
+                ).filter(
+                    start_time__lt=new_meeting.end_time,
+                    end_time__gt=new_meeting.start_time
+                )
+
             if overlapping_meetings.exists():
                 messages.error(request, 'This time slot is already taken in the selected room.')
                 return render(request, 'my_app/booking.html', {'form': form, 'users': User.objects.all()})
 
-            # Save the meeting and broadcast updates
+            # Save meeting
             new_meeting.save()
             broadcast_meeting_update(new_meeting.room)
             messages.success(request, 'Meeting booked successfully!')
-            return redirect('home')
+            return redirect('book_meeting')
     else:
         form = MeetingForm()
-
-    # Always pass `users` to the template
     users = User.objects.all()
     return render(request, 'my_app/booking.html', {'form': form, 'users': users})
 
@@ -206,3 +215,15 @@ def get_meetings(request):
     return JsonResponse(list(meetings.values(
         'user__name', 'date', 'start_time', 'end_time', 'duration', 'room'
     )), safe=False)
+
+def cleanup_meetings(request):
+    now = datetime.now()
+    past_meetings = Meeting.objects.filter(
+        date__lt=now.date()
+    ) | Meeting.objects.filter(
+        date=now.date(),
+        end_time__lte=now.time()
+    )
+    count = past_meetings.count()
+    past_meetings.delete()
+    return JsonResponse({'deleted_count': count})

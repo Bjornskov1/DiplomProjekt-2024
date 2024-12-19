@@ -6,21 +6,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book a New Meeting</title>
 
-    <!-- Flatpickr CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
+    <!-- jQuery Timepicker Addon CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.css">
+
+    <!-- jQuery and Timepicker Addon -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.js"></script>
+
     <style>
-        body { font-size: 18px; padding: 20px; }
-        .message { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; }
-        .error { color: red; background-color: #fdd; }
-        .success { color: green; background-color: #dfd; }
-        label, select, input { font-size: 24px; margin-bottom: 20px; }
-        input, select { width: 100%; padding: 15px; }
-        button { font-size: 24px; padding: 20px 40px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
-        button:hover { background-color: #218838; }
-        a { display: inline-block; font-size: 24px; padding: 20px 40px; margin-top: 20px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px; text-align: center; }
-        a:hover { background-color: #0056b3; }
+        body {
+            font-size: 18px;
+            padding: 20px;
+        }
+        .message {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .error {
+            color: red;
+            background-color: #fdd;
+        }
+        .success {
+            color: green;
+            background-color: #dfd;
+        }
+        label, select, input {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            font-size: 24px;
+            padding: 20px 40px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        a {
+            display: inline-block;
+            font-size: 24px;
+            padding: 20px 40px;
+            margin-top: 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        a:hover {
+            background-color: #0056b3;
+        }
+
+        /* Date and Timepicker Styling */
+        .ui-datepicker {
+            font-size: 18px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+        .ui-timepicker-div {
+            font-size: 18px;
+        }
+
+        /* Hide "Prev" and "Next" buttons */
+        .ui-datepicker-prev,
+        .ui-datepicker-next {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -40,6 +109,7 @@
     <form method="POST">
         {% csrf_token %}
 
+        <!-- User Selection -->
         <label for="user">Select User:</label>
         <select name="user" required>
             {% for user in users %}
@@ -47,12 +117,15 @@
             {% endfor %}
         </select><br><br>
 
+        <!-- Date Picker -->
         <label for="date">Date:</label>
-        <input type="date" name="date" required><br><br>
+        <input type="text" id="date" name="date" required><br><br>
 
+        <!-- Time Picker -->
         <label for="start_time">Start Time:</label>
-        <input type="text" name="start_time" required><br><br>
+        <input type="text" id="start_time" name="start_time" required><br><br>
 
+        <!-- Duration -->
         <label for="duration">Duration:</label>
         <select name="duration" required>
             <option value="15 minutes">15 Minutes</option>
@@ -61,25 +134,46 @@
             <option value="Whole Day">Whole Day</option>
         </select><br><br>
 
+        <!-- Meeting Room -->
         <label for="room">Select Meeting Room:</label>
         <select name="room" required>
             <option value="Møderum 1">Møderum 1</option>
             <option value="Møderum 2">Møderum 2</option>
         </select><br><br>
 
+        <!-- Submit Button -->
         <button type="submit">Add Meeting</button>
     </form>
 
+    <!-- Back to Home -->
     <a href="{% url 'home' %}">Back to Home</a>
 
-    <!-- Flatpickr JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- jQuery UI and Timepicker Initialization -->
     <script>
-        flatpickr("input[name='start_time']", {
-            enableTime: true,
-            noCalendar: true,
-            time_24hr: true,
-            dateFormat: "H:i"
+        $(function () {
+            // Initialize Date Picker
+            $('#date').datepicker({
+                dateFormat: 'yy-mm-dd', // Match Django's expected format
+                changeMonth: true,
+                changeYear: true,
+                minDate: 0, // Prevent selecting past dates
+                beforeShow: function(input, inst) {
+                    // Ensure Prev/Next buttons are hidden before showing
+                    setTimeout(function () {
+                        $('.ui-datepicker-prev, .ui-datepicker-next').remove();
+                    }, 10);
+                }
+            });
+
+            // Initialize Time Picker
+            $('#start_time').timepicker({
+                timeFormat: 'HH:mm', // 24-hour format
+                interval: 1,         // Minute interval
+                minTime: '06:00',    // Earliest time
+                dynamic: false,
+                dropdown: true,
+                scrollbar: true
+            });
         });
     </script>
 </body>

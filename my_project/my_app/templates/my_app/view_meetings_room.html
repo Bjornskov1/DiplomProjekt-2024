@@ -49,13 +49,18 @@
         // Hent rumnavnet fra skabelonen
         const roomName = "{{ room|escapejs }}";
 
-        function fetchMeetings() {
-            // Send API-anmodning med rumnavnet
+function fetchMeetings() {
+    fetch('/api/cleanup-meetings/')
+        .then(response => response.json())
+        .then(data => {
+            console.log(`Cleaned up ${data.deleted_count} past meetings.`);
+
+            // Now fetch the current meetings
             fetch(`/api/get-meetings/?room=${roomName}`)
                 .then(response => response.json())
                 .then(data => {
                     const meetingList = document.getElementById('meeting-list');
-                    meetingList.innerHTML = ''; // Ryd eksisterende møder
+                    meetingList.innerHTML = ''; // Clear existing meetings
                     data.forEach(meeting => {
                         const meetingHtml = `
                             <div class="meeting-item">
@@ -70,13 +75,15 @@
                     });
                 })
                 .catch(error => console.error('Error fetching meetings:', error));
-        }
+        })
+        .catch(error => console.error('Error cleaning up meetings:', error));
+}
 
-        // Opdater møder hvert 5. sekund
-        setInterval(fetchMeetings, 5000);
+// Update meetings and clean up every 5 seconds
+setInterval(fetchMeetings, 5000);
 
-        // Hent møder med det samme, når siden indlæses
-        fetchMeetings();
+// Fetch meetings immediately on page load
+fetchMeetings();
     </script>
 </body>
 </html>
