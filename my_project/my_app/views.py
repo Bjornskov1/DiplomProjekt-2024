@@ -48,17 +48,20 @@ def broadcast_meeting_update(room_name):
     )
     logger.info(f"Broadcast sent to group: {group_name}")  # Confirm broadcast
 
+from .utils import send_email_via_graph_api
+
 def book_meeting(request):
     if request.method == 'POST':
         form = MeetingForm(request.POST)
+        users = User.objects.all()  # Fetch users to include in the context
         if form.is_valid():
             new_meeting = form.save(commit=False)
 
-            # Valider og beregn slut-tidspunkt
+            # Validate and calculate end time
             today = datetime.now().date()
             if new_meeting.date < today:
                 messages.error(request, 'You cannot book a meeting for a past date.')
-                return render(request, 'my_app/booking.html', {'form': form})
+                return render(request, 'my_app/booking.html', {'form': form, 'users': users})
 
             start_datetime = datetime.combine(new_meeting.date, new_meeting.start_time)
             if new_meeting.duration == '15 minutes':
@@ -67,30 +70,49 @@ def book_meeting(request):
                 end_datetime = start_datetime + timedelta(minutes=30)
             elif new_meeting.duration == '60 minutes':
                 end_datetime = start_datetime + timedelta(minutes=60)
+            elif new_meeting.duration == '120 minutes':  # Added 120 minutes duration
+                end_datetime = start_datetime + timedelta(minutes=120)
             else:
-                end_datetime = start_datetime  # Default for "Whole Day"
+                end_datetime = start_datetime  # Default fallback
 
             new_meeting.end_time = end_datetime.time()
 
+            # Check for overlapping meetings
             overlapping_meetings = Meeting.objects.filter(
                 date=new_meeting.date,
                 start_time__lt=new_meeting.end_time,
+                end_time__gt=new_meeting.start_time,
                 room=new_meeting.room
             )
             if overlapping_meetings.exists():
-                
                 messages.error(request, 'This time slot is already taken in the selected room.')
-                return render(request, 'my_app/booking.html', {'form': form})
+                return render(request, 'my_app/booking.html', {'form': form, 'users': users})
 
-            # Gem mødet og broadcast opdateringer
+            # Save the meeting and broadcast updates
             new_meeting.save()
             broadcast_meeting_update(new_meeting.room)
-            messages.success(request, 'Meeting booked successfully!')
-            return redirect('home')
+            messages.success(request, 'Meeting booked successfully and Email is sent!')
+
+            # Send email notification (print to console)
+            subject = f"Meeting Confirmation: {new_meeting.room}"
+            body = (f"Dear {new_meeting.user.name},\n\n"
+                    f"Your meeting has been successfully booked.\n"
+                    f"Details:\n"
+                    f"Room: {new_meeting.room}\n"
+                    f"Date: {new_meeting.date}\n"
+                    f"Time: {new_meeting.start_time} - {new_meeting.end_time}\n"
+                    f"Duration: {new_meeting.duration}\n\n"
+                    f"Thank you.")
+            send_email_via_graph_api(new_meeting.user.email, subject, body)
+
+            # Render the form again to stay on the page
+            form = MeetingForm()  # Clear the form
+            return render(request, 'my_app/booking.html', {'form': form, 'users': users})
     else:
         form = MeetingForm()
-    users = User.objects.all()
+        users = User.objects.all()  # Fetch users to include in the context
     return render(request, 'my_app/booking.html', {'form': form, 'users': users})
+
 
 
 def view_meetings(request):
@@ -221,23 +243,27 @@ def get_meetings(request):
     # Få rumnavnet fra forespørgselsparametrene
     room = request.GET.get('room', None)
 
-    # Nu
-    now = datetime.now()
+    from django.utils.timezone import now  # Ensure timezone-aware datetime
+
+    current_time = now()  # Use timezone-aware current time
 
     # Filtrér kommende møder baseret på dato, tid og rum
     if room:
-        # Filtrér møder, der ikke er overståede
         meetings = Meeting.objects.filter(
-            date__gte=now.date(),  # Dagens eller fremtidige møder
-        ).filter(
-            models.Q(date__gt=now.date()) | models.Q(start_time__gte=now.time()),  # Ikke overstået
+            date__gte=current_time.date(),  # Today's or future dates
             room=room
+        ).filter(
+            models.Q(date__gt=current_time.date()) |  # Future meetings
+            models.Q(start_time__lte=current_time.time(), end_time__gte=current_time.time()) |  # Ongoing meetings
+            models.Q(start_time__gte=current_time.time())  # Future meetings today
         ).order_by('date', 'start_time')
     else:
         meetings = Meeting.objects.filter(
-            date__gte=now.date(),
+            date__gte=current_time.date(),
         ).filter(
-            models.Q(date__gt=now.date()) | models.Q(start_time__gte=now.time())
+            models.Q(date__gt=current_time.date()) |  # Future meetings
+            models.Q(start_time__lte=current_time.time(), end_time__gte=current_time.time()) |  # Ongoing meetings
+            models.Q(start_time__gte=current_time.time())  # Future meetings today
         ).order_by('date', 'start_time')
 
     return JsonResponse(list(meetings.values(
