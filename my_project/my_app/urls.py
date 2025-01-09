@@ -17,5 +17,5 @@ urlpatterns = [
     #Møderum 1 og 2 uden knapper
     path('room/moderum_1/no-buttons/', views.view_meetings_for_room_1_no_buttons, name='view_meetings_room_1_no_buttons'),
     path('room/moderum_2/no-buttons/', views.view_meetings_for_room_2_no_buttons, name='view_meetings_room_2_no_buttons'),
-    #path('delete-meeting/<int:meeting_id>/', views.delete_meeting, name='delete_meeting'),
+    path('api/delete-meeting/<int:meeting_id>/', views.delete_meeting, name='delete_meeting'),
 ]

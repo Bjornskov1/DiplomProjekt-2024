@@ -1,0 +1,259 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 40px;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+p {
+    font-size: 18px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    overflow-y: auto; /* Allow scrolling inside container */
+    -webkit-overflow-scrolling: touch; /* Enable smooth scrolling for touch devices */
+}
+
+/* Button Styles */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+a {
+    display: inline-block;
+    font-size: 18px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+}
+
+a:hover {
+    background-color: #0056b3;
+}
+
+/* Media Query for Smaller Screens */
+@media screen and (max-width: 800px) {
+    body {
+        font-size: 18px;
+    }
+
+    button, a {
+        font-size: 20px;
+        padding: 15px 30px;
+        width: 100%;
+    }
+
+    .meeting-card {
+        padding: 10px;
+        margin: 10px 0;
+    }
+}
+
+/* jQuery UI Datepicker Customization */
+.ui-datepicker {
+    font-size: 18px; /* Larger font for better visibility */
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    background-color: #fff;
+}
+
+.ui-datepicker-header {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ui-datepicker-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.ui-datepicker select {
+    font-size: 16px;
+    margin: 0 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+/* Hide Previous and Next Buttons */
+.ui-datepicker-prev,
+.ui-datepicker-next {
+    display: none !important;
+}
+
+/* Tempus Dominus Time Picker Customization */
+.input-group-text {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+.datetimepicker-input {
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+    width: 100%;
+}
+
+/* Flatpickr Time Picker Customization */
+.flatpickr-time {
+    font-size: 28px !important;
+    padding: 10px !important;
+    display: inline-flex;
+    align-items: center;
+}
+
+.flatpickr-time input {
+    width: 150px !important;
+    height: 50px !important;
+    font-size: 24px !important;
+    text-align: center !important;
+    border-radius: 8px !important;
+    padding: 0px 10px !important;
+    box-sizing: border-box;
+}
+
+.flatpickr-time .flatpickr-hour,
+.flatpickr-time .flatpickr-minute {
+    font-size: 28px !important;
+    height: 50px !important;
+    width: 60px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flatpickr-time .flatpickr-prev-hour,
+.flatpickr-time .flatpickr-next-hour,
+.flatpickr-time .flatpickr-prev-minute,
+.flatpickr-time .flatpickr-next-minute {
+    font-size: 32px !important;
+    width: 50px !important;
+    height: 50px !important;
+    line-height: 50px !important;
+}
+
+.flatpickr-time .flatpickr-am-pm {
+    display: none !important;
+}
+
+.flatpickr-calendar {
+    font-size: 24px !important;
+}
+
+/* General Alignment for Calendar and Time Inputs */
+.ui-datepicker, .flatpickr-calendar {
+    margin: 10px auto;
+    width: auto;
+    text-align: center;
+}
+
+/* Touchscreen Optimizations */
+body, html {
+    touch-action: pan-y; /* Enable vertical scrolling with touch gestures */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS and mobile devices */
+   /* overflow-y: hidden; /* Hide vertical scrollbar */
+}
+
+/* Scrollable content area (container adjustments) */
+.container {
+    overflow-y: auto; /* Allow vertical scrolling */
+    -webkit-overflow-scrolling: touch; /* Momentum-based scrolling */
+}
+
+/* Hide scrollbars */
+.container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+}
+
+.container {
+    scrollbar-width: none; /* Firefox */
+}
+
+/* Prevent text selection for touchscreens */
+body {
+    user-select: none; /* Disable text selection */
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Ensure form inputs behave correctly */
+input, select, textarea, button {
+    touch-action: manipulation; /* Preserve touch functionality */
+}
+
+/* Customize the scrollbar width for touch-friendly interaction */
+::-webkit-scrollbar {
+    width: 20px; /* Adjust the width for vertical scrollbars */
+    height: 20px; /* Adjust the height for horizontal scrollbars */
+}
+
+/* Style the scrollbar track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Light gray background */
+    border-radius: 10px; /* Rounded edges */
+}
+
+/* Style the scrollbar thumb (the moving part) */
+::-webkit-scrollbar-thumb {
+    background: #888; /* Medium gray color */
+    border-radius: 10px; /* Rounded edges */
+    border: 4px solid #f1f1f1; /* Add padding between thumb and track */
+}
+
+/* Hover effect for the scrollbar thumb */
+::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Darker gray on hover */
+}
+
+/* Style the scrollbar (for Webkit-based browsers like Chrome, Edge, Safari) */
+#content::-webkit-scrollbar {
+    width: 16px; /* Adjust scrollbar width */
+}
+
+/* Style the scrollbar thumb (the draggable part) */
+#content::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the thumb */
+    border-radius: 8px; /* Round edges */
+}
+
+/* Style the scrollbar track (the background) */
+#content::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Color of the track */
+}
+
+/* Add hover effect for the scrollbar thumb */
+#content::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Darker on hover */
+}

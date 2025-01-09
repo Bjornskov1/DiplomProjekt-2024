@@ -193,14 +193,15 @@
             // Initialize Time Picker
             $('#start_time').timepicker({
                 timeFormat: 'HH:mm',
-                interval: 5,
-                step:     5,
+                step: 5,  // Use step instead of interval
                 minTime: '06:00',
                 maxTime: '23:55',
                 dynamic: false,
                 dropdown: true,
-                scrollbar: true
+                scrollbar: false,
+                showPeriod: true  // Optional, ensures dropdown behavior
             });
+
         });
     </script>
     <script src="{% static 'my_app/js/scroll.js' %}"></script>

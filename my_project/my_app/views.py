@@ -4,10 +4,14 @@ import logging
 from datetime import datetime, timedelta
 
 from asgiref.sync import async_to_sync
+from celery.utils.time import make_aware
 from channels.layers import get_channel_layer
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.timezone import now
+from django.utils.timezone import localtime
+
 from .models import Meeting, User
 from .forms import MeetingForm
 from django.db import models
@@ -50,34 +54,49 @@ def broadcast_meeting_update(room_name):
 
 from .utils import send_email_via_graph_api
 
+from django.utils.timezone import make_aware
+
+from datetime import timedelta
+from django.utils.timezone import make_aware
+
 def book_meeting(request):
     if request.method == 'POST':
         form = MeetingForm(request.POST)
-        users = User.objects.all()  # Fetch users to include in the context
+        users = User.objects.all()
         if form.is_valid():
             new_meeting = form.save(commit=False)
 
-            # Validate and calculate end time
-            today = datetime.now().date()
-            if new_meeting.date < today:
+            current_time = now()  # Current time with timezone awareness
+            buffer_time = current_time - timedelta(minutes=1)  # Allow up to 1 minute buffer
+
+            # Validate past date
+            if new_meeting.date < current_time.date():
                 messages.error(request, 'You cannot book a meeting for a past date.')
                 return render(request, 'my_app/booking.html', {'form': form, 'users': users})
 
-            start_datetime = datetime.combine(new_meeting.date, new_meeting.start_time)
+            # Combine date and start_time and make it timezone-aware
+            start_datetime = make_aware(datetime.combine(new_meeting.date, new_meeting.start_time))
+
+            # Validate same-day past time with a 1-minute buffer
+            if new_meeting.date == current_time.date() and start_datetime < buffer_time:
+                messages.error(request, 'You cannot book a meeting for a time more than 1 minute in the past.')
+                return render(request, 'my_app/booking.html', {'form': form, 'users': users})
+
+            # Calculate end time
             if new_meeting.duration == '15 minutes':
                 end_datetime = start_datetime + timedelta(minutes=15)
             elif new_meeting.duration == '30 minutes':
                 end_datetime = start_datetime + timedelta(minutes=30)
             elif new_meeting.duration == '60 minutes':
                 end_datetime = start_datetime + timedelta(minutes=60)
-            elif new_meeting.duration == '120 minutes':  # Added 120 minutes duration
+            elif new_meeting.duration == '120 minutes':
                 end_datetime = start_datetime + timedelta(minutes=120)
             else:
-                end_datetime = start_datetime  # Default fallback
+                end_datetime = start_datetime
 
             new_meeting.end_time = end_datetime.time()
 
-            # Check for overlapping meetings
+            # Validate overlapping meetings
             overlapping_meetings = Meeting.objects.filter(
                 date=new_meeting.date,
                 start_time__lt=new_meeting.end_time,
@@ -88,16 +107,16 @@ def book_meeting(request):
                 messages.error(request, 'This time slot is already taken in the selected room.')
                 return render(request, 'my_app/booking.html', {'form': form, 'users': users})
 
-            # Save the meeting and broadcast updates
+            # Save meeting and broadcast
             new_meeting.save()
             broadcast_meeting_update(new_meeting.room)
-            messages.success(request, 'Meeting booked successfully and Email is sent!')
+            messages.success(request, 'Meeting booked successfully and Mail is sent!')
 
-            # Send email notification (print to console)
+            # Send email to user
             subject = f"Meeting Confirmation: {new_meeting.room}"
             body = (f"Dear {new_meeting.user.name},\n\n"
-                    f"Your meeting has been successfully booked.\n"
-                    f"Details:\n"
+                    f"Your meeting has been successfully booked. \n"
+                    f"Details: \n"
                     f"Room: {new_meeting.room}\n"
                     f"Date: {new_meeting.date}\n"
                     f"Time: {new_meeting.start_time} - {new_meeting.end_time}\n"
@@ -106,13 +125,16 @@ def book_meeting(request):
             send_email_via_graph_api(new_meeting.user.email, subject, body)
 
             # Render the form again to stay on the page
-            form = MeetingForm()  # Clear the form
+            form = MeetingForm()  # Reset form after success
             return render(request, 'my_app/booking.html', {'form': form, 'users': users})
+
+        else:
+            messages.error(request, 'Invalid form submission. Please check your inputs.')
     else:
         form = MeetingForm()
-        users = User.objects.all()  # Fetch users to include in the context
-    return render(request, 'my_app/booking.html', {'form': form, 'users': users})
+        users = User.objects.all()
 
+    return render(request, 'my_app/booking.html', {'form': form, 'users': users})
 
 
 def view_meetings(request):
@@ -240,14 +262,9 @@ def view_meetings_for_room_2_no_buttons(request):
 
 
 def get_meetings(request):
-    # Få rumnavnet fra forespørgselsparametrene
     room = request.GET.get('room', None)
+    current_time = now()
 
-    from django.utils.timezone import now  # Ensure timezone-aware datetime
-
-    current_time = now()  # Use timezone-aware current time
-
-    # Filtrér kommende møder baseret på dato, tid og rum
     if room:
         meetings = Meeting.objects.filter(
             date__gte=current_time.date(),  # Today's or future dates
@@ -261,30 +278,54 @@ def get_meetings(request):
         meetings = Meeting.objects.filter(
             date__gte=current_time.date(),
         ).filter(
-            models.Q(date__gt=current_time.date()) |  # Future meetings
-            models.Q(start_time__lte=current_time.time(), end_time__gte=current_time.time()) |  # Ongoing meetings
-            models.Q(start_time__gte=current_time.time())  # Future meetings today
+            models.Q(date__gt=current_time.date()) |
+            models.Q(start_time__lte=current_time.time(), end_time__gte=current_time.time()) |
+            models.Q(start_time__gte=current_time.time())
         ).order_by('date', 'start_time')
 
     return JsonResponse(list(meetings.values(
-        'user__name', 'date', 'start_time', 'end_time', 'duration', 'room'
+        'id', 'user__name', 'date', 'start_time', 'end_time', 'duration', 'room'
     )), safe=False)
 
 def cleanup_meetings(request):
+    current_time = localtime()  # Use timezone-aware local time
 
-    # Nu
-    now = datetime.now()
-
-    # Filtrér kommende møder baseret på dato, tid og rum
+    # Identify past meetings
     past_meetings = Meeting.objects.filter(
-        date__lt=now.date()
-    ) | Meeting.objects.filter(
-        date=now.date(),
-        end_time__lt=now.time()
+        models.Q(date__lt=current_time.date()) |  # Meetings before today
+        models.Q(date=current_time.date(), end_time__lte=current_time.time())  # Meetings today but already ended
     )
+    #print(f"Current time: {current_time.time()}")
+    #print(past_meetings)
 
+    # Debugging: Print meetings to be deleted
+    logger.info(f"Meetings to delete: {[meeting.id for meeting in past_meetings]}")
+
+    # Count and delete past meetings
     count = past_meetings.count()
-
+    room_names = past_meetings.values_list('room', flat=True).distinct()  # Get affected rooms
     past_meetings.delete()
 
+    # Broadcast updates for each room
+    for room_name in room_names:
+        broadcast_meeting_update(room_name)
+
     return JsonResponse({'deleted_count': count})
+
+
+def delete_meeting(request, meeting_id):
+    if request.method == 'DELETE':  # Ensure it's a DELETE request
+        try:
+            # Fetch the meeting by ID
+            meeting = get_object_or_404(Meeting, id=meeting_id)
+            room_name = meeting.room  # Save room name for broadcasting
+            meeting.delete()  # Delete the meeting
+
+            # Optionally broadcast an update to refresh data
+            broadcast_meeting_update(room_name)
+
+            return JsonResponse({'message': 'Meeting deleted successfully.'}, status=200)
+        except Meeting.DoesNotExist:
+            return JsonResponse({'error': 'Meeting not found.'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)

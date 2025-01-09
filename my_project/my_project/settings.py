@@ -27,6 +27,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['192.168.252.22', '0.0.0.0', '127.0.0.1', 'localhost']
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://192.168.252.22',  # Internal IP
+    'http://0.0.0.0',         # General wildcard
+    'http://127.0.0.1',       # Localhost (IPv4)
+    'http://localhost',       # Localhost (name)
+]
 
 # Application definition
 
@@ -134,7 +140,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'Europe/Copenhagen'
 
 USE_I18N = True
 
