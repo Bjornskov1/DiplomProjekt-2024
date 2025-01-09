@@ -5,19 +5,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meetings in {{ room }}</title>
+    <script src="{% static 'my_app/js/scroll.js' %}"></script>
+
     <style>
         body {
-            font-size: 18px;
-            padding: 20px;
+            font-size: 16px;
+            padding: 1px;
             font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f9f9f9;
         }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        a {
+            display: block;
+            font-size: 16px;
+            text-align: center;
+            padding: 15px 20px;
+            margin: 10px auto;
+            width: fit-content;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        a:hover {
+            background-color: #0056b3;
+        }
+
+        /* Scrollable container for the meeting list */
+        #content {
+            height: 80vh; /* Make the container take up 80% of the viewport height */
+            overflow-y: auto; /* Enable vertical scrolling */
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 0 auto;
+            width: 90%;
+            max-width: 800px;
+        }
+
         .meeting-item {
             border: 1px solid #ddd;
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 5px;
             background-color: #f9f9f9;
+            transition: transform 0.2s ease;
         }
+
+        .meeting-item:hover {
+            transform: scale(1.02);
+        }
+
         .meeting-item h3 {
             font-size: 24px;
             margin: 0;
@@ -27,63 +76,66 @@
 <body>
     <h1>Meetings in {{ room }}</h1>
 
-    <!-- Listevisning af møder -->
-    <div id="meeting-list">
-        {% if meetings %}
-            {% for meeting in meetings %}
-                <div class="meeting-item">
-                    <h3>{{ meeting.user.name }}</h3>
-                    <p><strong>Date:</strong> {{ meeting.date }}</p>
-                    <p><strong>Time:</strong> {{ meeting.start_time }} - {{ meeting.end_time }}</p>
-                    <p><strong>Duration:</strong> {{ meeting.duration }}</p>
-                    <p><strong>Room:</strong> {{ meeting.room }}</p>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>No upcoming meetings in {{ room }}.</p>
-        {% endif %}
+    <a href="{% url 'home' %}">Back to Home</a>
+
+    <!-- Scrollable content -->
+    <div id="content">
+        <div id="meeting-list">
+            {% if meetings %}
+                {% for meeting in meetings %}
+                    <div class="meeting-item">
+                        <h3>{{ meeting.user.name }}</h3>
+                        <p><strong>Date:</strong> {{ meeting.date }}</p>
+                        <p><strong>Time:</strong> {{ meeting.start_time }} - {{ meeting.end_time }}</p>
+                        <p><strong>Duration:</strong> {{ meeting.duration }}</p>
+                        <p><strong>Room:</strong> {{ meeting.room }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No upcoming meetings in {{ room }}.</p>
+            {% endif %}
+        </div>
     </div>
 
-    <!-- Script til at opdatere mødelisten -->
+    <!-- Script to update meeting list -->
     <script>
-        // Hent rumnavnet fra skabelonen
         const roomName = "{{ room|escapejs }}";
 
-function fetchMeetings() {
-    fetch('/api/cleanup-meetings/')
-        .then(response => response.json())
-        .then(data => {
-            console.log(`Cleaned up ${data.deleted_count} past meetings.`);
-
-            // Now fetch the current meetings
-            fetch(`/api/get-meetings/?room=${roomName}`)
+        function fetchMeetings() {
+            fetch('/api/cleanup-meetings/')
                 .then(response => response.json())
                 .then(data => {
-                    const meetingList = document.getElementById('meeting-list');
-                    meetingList.innerHTML = ''; // Clear existing meetings
-                    data.forEach(meeting => {
-                        const meetingHtml = `
-                            <div class="meeting-item">
-                                <h3>${meeting.user__name}</h3>
-                                <p><strong>Date:</strong> ${meeting.date}</p>
-                                <p><strong>Time:</strong> ${meeting.start_time} - ${meeting.end_time}</p>
-                                <p><strong>Duration:</strong> ${meeting.duration}</p>
-                                <p><strong>Room:</strong> ${meeting.room}</p>
-                            </div>
-                        `;
-                        meetingList.innerHTML += meetingHtml;
-                    });
+                    console.log(`Cleaned up ${data.deleted_count} past meetings.`);
+
+                    // Now fetch the current meetings
+                    fetch(`/api/get-meetings/?room=${roomName}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const meetingList = document.getElementById('meeting-list');
+                            meetingList.innerHTML = ''; // Clear existing meetings
+                            data.forEach(meeting => {
+                                const meetingHtml = `
+                                    <div class="meeting-item">
+                                        <h3>${meeting.user__name}</h3>
+                                        <p><strong>Date:</strong> ${meeting.date}</p>
+                                        <p><strong>Time:</strong> ${meeting.start_time} - ${meeting.end_time}</p>
+                                        <p><strong>Duration:</strong> ${meeting.duration}</p>
+                                        <p><strong>Room:</strong> ${meeting.room}</p>
+                                    </div>
+                                `;
+                                meetingList.innerHTML += meetingHtml;
+                            });
+                        })
+                        .catch(error => console.error('Error fetching meetings:', error));
                 })
-                .catch(error => console.error('Error fetching meetings:', error));
-        })
-        .catch(error => console.error('Error cleaning up meetings:', error));
-}
+                .catch(error => console.error('Error cleaning up meetings:', error));
+        }
 
-// Update meetings and clean up every 5 seconds
-setInterval(fetchMeetings, 5000);
+        // Update meetings and clean up every 5 seconds
+        setInterval(fetchMeetings, 5000);
 
-// Fetch meetings immediately on page load
-fetchMeetings();
+        // Fetch meetings immediately on page load
+        fetchMeetings();
     </script>
 </body>
 </html>

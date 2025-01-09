@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-((fkgft!04ps8*asyx1630yzqkj2e=9*_m%7*-(06s2v*l5n*^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.252.22', '0.0.0.0', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -51,15 +51,26 @@ CHANNEL_LAYERS = {
     },
 }
 
+#Azure setup
+AZURE_CLIENT_ID = '016456a3-8023-4c07-a345-3a89c8e3124d'
+AZURE_CLIENT_SECRET = 'z2u8Q~XhEoytFzFP3OpPeJYRwjKQ7nGn.noTRcFi'
+AZURE_TENANT_ID = '4a3f472f-6e15-42f9-8d9f-44654903975f'
+AZURE_SCOPES = ['https://graph.microsoft.com/.default']
+AZURE_EMAIL_ENDPOINT = 'https://graph.microsoft.com/v1.0/me/sendMail'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    
 ]
 
 ROOT_URLCONF = "my_project.urls"
@@ -134,7 +145,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'my_app/static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, 'my_app/static')
+#]
+#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'my_app/static')]
+#STATIC_ROOT = '/home/mabj/Documents/ProjectTest/my_project/my_app/static/'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

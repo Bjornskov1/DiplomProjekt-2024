@@ -1,3 +1,5 @@
+from django.http import HttpResponse
+from django.conf import settings
 from django.urls import path
 from . import views
 
@@ -12,4 +14,8 @@ urlpatterns = [
     #Møderum 1 og 2
     path('room/moderum_1/', views.view_meetings_for_room_1, name='view_meetings_room_1'),
     path('room/moderum_2/', views.view_meetings_for_room_2, name='view_meetings_room_2'),
+    #Møderum 1 og 2 uden knapper
+    path('room/moderum_1/no-buttons/', views.view_meetings_for_room_1_no_buttons, name='view_meetings_room_1_no_buttons'),
+    path('room/moderum_2/no-buttons/', views.view_meetings_for_room_2_no_buttons, name='view_meetings_room_2_no_buttons'),
+
 ]

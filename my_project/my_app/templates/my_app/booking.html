@@ -6,86 +6,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book a New Meeting</title>
 
-    <!-- jQuery UI CSS -->
+    <!-- External Styles -->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
-
-    <!-- jQuery Timepicker Addon CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.css">
+    <link rel="stylesheet" href="{% static 'my_app/css/style.css' %}?v=2">
 
-    <!-- jQuery and Timepicker Addon -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.js"></script>
-
+    <!-- Inline Styles for Enhanced Design -->
     <style>
         body {
+            font-family: Arial, sans-serif;
             font-size: 18px;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
         }
+
+        /* Scrollable container */
+        #content {
+            overflow-y: auto;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         .message {
             border: 1px solid #ccc;
             padding: 20px;
             margin-bottom: 20px;
+            border-radius: 5px;
         }
+
         .error {
             color: red;
             background-color: #fdd;
         }
+
         .success {
             color: green;
             background-color: #dfd;
         }
-        label, select, input {
-            font-size: 24px;
-            margin-bottom: 20px;
+
+        label {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #555;
         }
+
         input, select {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #ccc;
+            font-size: 18px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box;
         }
+
         button {
-            font-size: 24px;
-            padding: 20px 40px;
+            width: 100%;
+            font-size: 20px;
+            padding: 15px;
             background-color: #28a745;
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            width: 100%;
         }
+
         button:hover {
             background-color: #218838;
         }
+
         a {
-            display: inline-block;
-            font-size: 24px;
-            padding: 20px 40px;
-            margin-top: 20px;
-            background-color: #007BFF;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
+            display: block;
+            font-size: 18px;
             text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            color: #fff;
+            background-color: #007BFF;
+            border-radius: 5px;
+            text-decoration: none;
         }
+
         a:hover {
             background-color: #0056b3;
         }
 
-        /* Date and Timepicker Styling */
-        .ui-datepicker {
-            font-size: 18px;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 5px;
-        }
-        .ui-timepicker-div {
-            font-size: 18px;
+        /* Date and Time Picker Customizations */
+        .ui-datepicker, .ui-timepicker-div {
+            font-size: 16px;
         }
 
-        /* Hide "Prev" and "Next" buttons */
         .ui-datepicker-prev,
         .ui-datepicker-next {
             display: none !important;
@@ -93,72 +113,77 @@
     </style>
 </head>
 <body>
-    <h1>Book a New Meeting</h1>
+    <div id="content">
+        <h1>Book a New Meeting</h1>
 
-    <!-- Display messages -->
-    {% if messages %}
+        <!-- Display messages -->
+        {% if messages %}
         <div class="message-container">
             {% for message in messages %}
-                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
-                    {{ message }}
-                </div>
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
             {% endfor %}
         </div>
-    {% endif %}
+        {% endif %}
 
-    <form method="POST">
-        {% csrf_token %}
+        <!-- Form -->
+        <form method="POST">
+            {% csrf_token %}
 
-        <!-- User Selection -->
-        <label for="user">Select User:</label>
-        <select name="user" required>
-            {% for user in users %}
+            <!-- User Selection -->
+            <label for="user">Select User:</label>
+            <select id="user" name="user" required>
+                {% for user in users %}
                 <option value="{{ user.id }}">{{ user.name }} ({{ user.email }})</option>
-            {% endfor %}
-        </select><br><br>
+                {% endfor %}
+            </select>
 
-        <!-- Date Picker -->
-        <label for="date">Date:</label>
-        <input type="text" id="date" name="date" required><br><br>
+            <!-- Date Picker -->
+            <label for="date">Date:</label>
+            <input type="text" id="date" name="date" required>
 
-        <!-- Time Picker -->
-        <label for="start_time">Start Time:</label>
-        <input type="text" id="start_time" name="start_time" required><br><br>
+            <!-- Time Picker -->
+            <label for="start_time">Start Time:</label>
+            <input type="text" id="start_time" name="start_time" required>
 
-        <!-- Duration -->
-        <label for="duration">Duration:</label>
-        <select name="duration" required>
-            <option value="15 minutes">15 Minutes</option>
-            <option value="30 minutes">30 Minutes</option>
-            <option value="60 minutes">60 Minutes</option>
-            <option value="Whole Day">Whole Day</option>
-        </select><br><br>
+            <!-- Duration -->
+            <label for="duration">Duration:</label>
+            <select id="duration" name="duration" required>
+                <option value="15 minutes">15 Minutes</option>
+                <option value="30 minutes">30 Minutes</option>
+                <option value="60 minutes">60 Minutes</option>
+                <option value="Whole Day">Whole Day</option>
+            </select>
 
-        <!-- Meeting Room -->
-        <label for="room">Select Meeting Room:</label>
-        <select name="room" required>
-            <option value="Møderum 1">Møderum 1</option>
-            <option value="Møderum 2">Møderum 2</option>
-        </select><br><br>
+            <!-- Meeting Room -->
+            <label for="room">Select Meeting Room:</label>
+            <select id="room" name="room" required>
+                <option value="Møderum 1">Møderum 1</option>
+                <option value="Møderum 2">Møderum 2</option>
+            </select>
 
-        <!-- Submit Button -->
-        <button type="submit">Add Meeting</button>
-    </form>
+            <!-- Submit Button -->
+            <button type="submit">Add Meeting</button>
+        </form>
 
-    <!-- Back to Home -->
-    <a href="{% url 'home' %}">Back to Home</a>
+        <!-- Back to Home -->
+        <a href="{% url 'home' %}">Back to Home</a>
+    </div>
 
-    <!-- jQuery UI and Timepicker Initialization -->
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.js"></script>
     <script>
         $(function () {
             // Initialize Date Picker
             $('#date').datepicker({
-                dateFormat: 'yy-mm-dd', // Match Django's expected format
+                dateFormat: 'yy-mm-dd',
                 changeMonth: true,
                 changeYear: true,
-                minDate: 0, // Prevent selecting past dates
-                beforeShow: function(input, inst) {
-                    // Ensure Prev/Next buttons are hidden before showing
+                minDate: 0,
+                beforeShow: function (input, inst) {
                     setTimeout(function () {
                         $('.ui-datepicker-prev, .ui-datepicker-next').remove();
                     }, 10);
@@ -167,14 +192,17 @@
 
             // Initialize Time Picker
             $('#start_time').timepicker({
-                timeFormat: 'HH:mm', // 24-hour format
-                interval: 1,         // Minute interval
-                minTime: '06:00',    // Earliest time
+                timeFormat: 'HH:mm',
+                interval: 5,
+                step:     5,
+                minTime: '06:00',
+                maxTime: '23:55',
                 dynamic: false,
                 dropdown: true,
                 scrollbar: true
             });
         });
     </script>
+    <script src="{% static 'my_app/js/scroll.js' %}"></script>
 </body>
 </html>

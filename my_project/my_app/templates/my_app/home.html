@@ -5,17 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Django Pi Project</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'my_app/css/style.css' %}">
     <style>
         body {
             text-align: center;
-            margin: 50px;
-            font-size: 24px; /* Larger font for touch-friendly */
+            margin: 5px;
+            font-size: 20px; /* Larger font for touch-friendly */
         }
         .button {
             display: block; /* Make buttons stack vertically */
             padding: 30px 60px; /* Larger padding for touch */
-            font-size: 32px; /* Larger font size */
+            font-size: 20px; /* Larger font size */
             margin: 20px auto; /* Center buttons and add spacing */
             background-color: #007BFF;
             color: white;
@@ -38,10 +38,10 @@
     <a href="{% url 'book_meeting' %}" class="button">Add Meeting</a>
 
     <!-- Button to View Today's Meetings for Møderum 1 -->
-    <a href="{% url 'view_meetings_room_1' %}" class="button">Today's Meetings for Møderum 1</a>
+    <a href="{% url 'view_meetings_room_1' %}" class="button">Current Meetings for Møderum 1</a>
 
     <!-- Button to View Today's Meetings for Møderum 2 -->
-    <a href="{% url 'view_meetings_room_2' %}" class="button">Today's Meetings for Møderum 2</a>
+    <a href="{% url 'view_meetings_room_2' %}" class="button">Current Meetings for Møderum 2</a>
 
 </body>
 </html>

@@ -54,47 +54,39 @@ def book_meeting(request):
         if form.is_valid():
             new_meeting = form.save(commit=False)
 
-            # Validate date
+            # Valider og beregn slut-tidspunkt
             today = datetime.now().date()
             if new_meeting.date < today:
                 messages.error(request, 'You cannot book a meeting for a past date.')
-                return render(request, 'my_app/booking.html', {'form': form, 'users': User.objects.all()})
+                return render(request, 'my_app/booking.html', {'form': form})
 
-            # Calculate end time based on duration
             start_datetime = datetime.combine(new_meeting.date, new_meeting.start_time)
-            duration_mapping = {
-                '15 minutes': 15,
-                '30 minutes': 30,
-                '60 minutes': 60,
-                'Whole Day': 1440  # Whole day as minutes
-            }
-            end_datetime = start_datetime + timedelta(minutes=duration_mapping.get(new_meeting.duration, 0))
+            if new_meeting.duration == '15 minutes':
+                end_datetime = start_datetime + timedelta(minutes=15)
+            elif new_meeting.duration == '30 minutes':
+                end_datetime = start_datetime + timedelta(minutes=30)
+            elif new_meeting.duration == '60 minutes':
+                end_datetime = start_datetime + timedelta(minutes=60)
+            else:
+                end_datetime = start_datetime  # Default for "Whole Day"
+
             new_meeting.end_time = end_datetime.time()
 
-            # Overlap check
-            if new_meeting.duration == 'Whole Day':
-                overlapping_meetings = Meeting.objects.filter(
-                    date=new_meeting.date,
-                    room=new_meeting.room
-                )
-            else:
-                overlapping_meetings = Meeting.objects.filter(
-                    date=new_meeting.date,
-                    room=new_meeting.room
-                ).filter(
-                    start_time__lt=new_meeting.end_time,
-                    end_time__gt=new_meeting.start_time
-                )
-
+            overlapping_meetings = Meeting.objects.filter(
+                date=new_meeting.date,
+                start_time__lt=new_meeting.end_time,
+                room=new_meeting.room
+            )
             if overlapping_meetings.exists():
+                
                 messages.error(request, 'This time slot is already taken in the selected room.')
-                return render(request, 'my_app/booking.html', {'form': form, 'users': User.objects.all()})
+                return render(request, 'my_app/booking.html', {'form': form})
 
-            # Save meeting
+            # Gem mødet og broadcast opdateringer
             new_meeting.save()
             broadcast_meeting_update(new_meeting.room)
             messages.success(request, 'Meeting booked successfully!')
-            return redirect('book_meeting')
+            return redirect('home')
     else:
         form = MeetingForm()
     users = User.objects.all()
@@ -187,6 +179,42 @@ def view_meetings_for_room_2(request):
         'room': 'Møderum 2',
         'events': events,
     })
+def view_meetings_for_room_1_no_buttons(request):
+    today = datetime.now().date()
+    meetings = Meeting.objects.filter(date__gte=today, room="Møderum 1")
+    events = [
+        {
+            "title": meeting.user.name,
+            "start": f"{meeting.date}T{meeting.start_time}",
+            "end": f"{meeting.date}T{meeting.end_time}",
+            "description": f"Duration: {meeting.duration}"
+        }
+        for meeting in meetings
+    ]
+    return render(request, 'my_app/view_meetings_room_no_buttons.html', {
+        'meetings': meetings,
+        'room': 'Møderum 1',
+        'events': events,
+    })
+
+
+def view_meetings_for_room_2_no_buttons(request):
+    today = datetime.now().date()
+    meetings = Meeting.objects.filter(date__gte=today, room="Møderum 2")
+    events = [
+        {
+            "title": meeting.user.name,
+            "start": f"{meeting.date}T{meeting.start_time}",
+            "end": f"{meeting.date}T{meeting.end_time}",
+            "description": f"Duration: {meeting.duration}"
+        }
+        for meeting in meetings
+    ]
+    return render(request, 'my_app/view_meetings_room_no_buttons.html', {
+        'meetings': meetings,
+        'room': 'Møderum 2',
+        'events': events,
+    })
 
 
 def get_meetings(request):
@@ -217,13 +245,20 @@ def get_meetings(request):
     )), safe=False)
 
 def cleanup_meetings(request):
+
+    # Nu
     now = datetime.now()
+
+    # Filtrér kommende møder baseret på dato, tid og rum
     past_meetings = Meeting.objects.filter(
         date__lt=now.date()
     ) | Meeting.objects.filter(
         date=now.date(),
-        end_time__lte=now.time()
+        end_time__lt=now.time()
     )
+
     count = past_meetings.count()
+
     past_meetings.delete()
+
     return JsonResponse({'deleted_count': count})
