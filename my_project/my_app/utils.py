@@ -5,14 +5,14 @@ from django.core.mail import EmailMessage
 
 def send_email_via_graph_api(recipient_email, subject, body):
     try:
-        # Use Django's EmailMessage to simulate sending email
+        #Simulate sending email
         email = EmailMessage(
             subject=subject,
             body=body,
             from_email="Meeting@angroupdk.onmicrosoft.com",
             to=[recipient_email]
         )
-        email.send()  # This will use the console backend to print the email content
+        email.send()  #Print the email content
         print("Email content sent to console for debugging.")
         return True
     except Exception as e:
@@ -40,7 +40,7 @@ def send_email_via_graph_api(recipient_email, subject, body):
 #                "saveToSentItems": "false",
 #            }
 #            # Use the specific user's email for the endpoint
-#            sender_email = "Meeting@angroupdk.onmicrosoft.com"  # Replace with the sender's email address
+#            sender_email = "Meeting@angroupdk.onmicrosoft.com"
 #            endpoint = f"https://graph.microsoft.com/v1.0/users/{sender_email}/sendMail"
 #
 #            response = requests.post(endpoint, headers=headers, json=email_data)

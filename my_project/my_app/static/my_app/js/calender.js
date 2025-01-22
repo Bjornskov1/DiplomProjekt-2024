@@ -1,18 +1,17 @@
 document.addEventListener('DOMContentLoaded', function () {
     var calendarEl = document.getElementById('calendar');
 
-    // Hent JSON-data fra script-tagget
+    // get JSON-data
     var rawData = document.getElementById('calendar-data').textContent;
 
     try {
-        var events = JSON.parse(rawData); // Konverter JSON-strengen til et objekt
-        console.log("Parsed Events:", events); // Debug JSON i konsollen
+        var events = JSON.parse(rawData); // Convert JSON-string to JSON-object
     } catch (error) {
         console.error("Error parsing JSON:", error);
-        return; // Stop her, hvis JSON ikke kan parses
+        return; // Stop here if JSON is invalid
     }
 
-    // Initialiser FullCalendar
+    // Initialize FullCalendar
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         headerToolbar: {
@@ -20,11 +19,11 @@ document.addEventListener('DOMContentLoaded', function () {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
-        events: events, // Brug JSON-data direkte
+        events: events, // Use JSON-data
         eventClick: function (info) {
             alert(info.event.title + "\n" + info.event.extendedProps.description);
         }
     });
 
-    calendar.render(); // Vis kalenderen
+    calendar.render(); // show kalenderen
 });

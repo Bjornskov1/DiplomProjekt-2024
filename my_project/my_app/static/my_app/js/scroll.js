@@ -12,10 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     content.addEventListener('pointerdown', (e) => {
         isScrolling = true;
         lastY = e.pageY; // Record the pointer's current position
-        console.log("Pointer down at:", lastY);
+        console.log("Pointer down at:", lastY); //for debug purposes
     });
 
-    // Pointer move: Adjust the scroll position dynamically
+
     content.addEventListener('pointermove', (e) => {
         if (!isScrolling) return; // Only scroll if pointer is active
         const deltaY = lastY - e.pageY; // Calculate movement delta
@@ -36,6 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Pointer cancelled.");
     });
 
-    // Optional: Prevent context menu on long press (touch devices)
+
     content.addEventListener('contextmenu', (e) => e.preventDefault());
 });

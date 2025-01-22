@@ -6,7 +6,7 @@ async def test_websocket():
     try:
         async with websockets.connect(uri) as websocket:
             print(f"Connected to {uri}")
-            # Læs beskeder fra WebSocket (tilføj, hvis serveren sender noget)
+            # read messages from the server
             async for message in websocket:
                 print(f"Message received: {message}")
     except Exception as e:

@@ -2,7 +2,6 @@ import json
 import logging
 
 from datetime import datetime, timedelta
-
 from asgiref.sync import async_to_sync
 from celery.utils.time import make_aware
 from channels.layers import get_channel_layer
@@ -11,7 +10,9 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
 from django.utils.timezone import localtime
-
+from .utils import send_email_via_graph_api
+from datetime import timedelta
+from django.utils.timezone import make_aware
 from .models import Meeting, User
 from .forms import MeetingForm
 from django.db import models
@@ -22,7 +23,7 @@ def home(request):
     return render(request, 'my_app/home.html')
 
 
-# Broadcast opdateringer, når møder ændres
+# Broadcast updates to WebSocket group
 def broadcast_meeting_update(room_name):
     group_name = room_name.replace(" ", "_").replace("ø", "o").lower()
     logger.info(f"Broadcasting update to group: {group_name}")  # Debug log
@@ -41,7 +42,7 @@ def broadcast_meeting_update(room_name):
         for meeting in meetings
     ]
 
-    # Broadcast to WebSocket group
+
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         group_name,
@@ -52,12 +53,7 @@ def broadcast_meeting_update(room_name):
     )
     logger.info(f"Broadcast sent to group: {group_name}")  # Confirm broadcast
 
-from .utils import send_email_via_graph_api
 
-from django.utils.timezone import make_aware
-
-from datetime import timedelta
-from django.utils.timezone import make_aware
 
 def book_meeting(request):
     if request.method == 'POST':
@@ -74,10 +70,10 @@ def book_meeting(request):
                 messages.error(request, 'You cannot book a meeting for a past date.')
                 return render(request, 'my_app/booking.html', {'form': form, 'users': users})
 
-            # Combine date and start_time and make it timezone-aware
+
             start_datetime = make_aware(datetime.combine(new_meeting.date, new_meeting.start_time))
 
-            # Validate same-day past time with a 1-minute buffer
+            # Validate same-day past time with a 1-minute buffer for "now" time
             if new_meeting.date == current_time.date() and start_datetime < buffer_time:
                 messages.error(request, 'You cannot book a meeting for a time more than 1 minute in the past.')
                 return render(request, 'my_app/booking.html', {'form': form, 'users': users})
@@ -125,7 +121,7 @@ def book_meeting(request):
             send_email_via_graph_api(new_meeting.user.email, subject, body)
 
             # Render the form again to stay on the page
-            form = MeetingForm()  # Reset form after success
+            form = MeetingForm()
             return render(request, 'my_app/booking.html', {'form': form, 'users': users})
 
         else:
@@ -143,45 +139,21 @@ def view_meetings(request):
     return render(request, 'my_app/view_meetings.html', {'meetings': meetings})
 
 
-def cancel_meeting(request, name):
+def cancel_meeting(request, name): #Older version
     try:
         meeting = Meeting.objects.get(name=name)
-        room_name = meeting.room  # Gem rumnavnet inden sletning
+        room_name = meeting.room
         meeting.delete()
-        broadcast_meeting_update(room_name)  # Broadcast opdateringer
+        broadcast_meeting_update(room_name)
         messages.success(request, 'Meeting cancelled successfully!')
     except Meeting.DoesNotExist:
         messages.error(request, 'Meeting not found.')
     return redirect('view_meetings')
 
 
-def edit_meeting(request, name):
-    meeting = get_object_or_404(Meeting, name=name)
-    if request.method == 'POST':
-        form = MeetingForm(request.POST, instance=meeting)
-        if form.is_valid():
-            updated_meeting = form.save(commit=False)
-
-            # Valider og beregn slut-tidspunkt
-            start_datetime = datetime.combine(updated_meeting.date, updated_meeting.start_time)
-            duration_mapping = {'15 minutes': 15, '30 minutes': 30, '60 minutes': 60}
-            end_datetime = start_datetime + timedelta(minutes=duration_mapping.get(updated_meeting.duration, 0))
-            updated_meeting.end_time = end_datetime.time()
-
-            # Gem mødet og broadcast opdateringer
-            updated_meeting.save()
-            broadcast_meeting_update(updated_meeting.room)
-            messages.success(request, 'Meeting updated successfully!')
-            return redirect('view_meetings')
-    else:
-        form = MeetingForm(instance=meeting)
-    users = User.objects.all()
-    return render(request, 'my_app/edit_meeting.html', {'form': form, 'meeting': meeting, 'users': users})
-
-
-def clear_meetings(request):
+def clear_meetings(request): #Older version
     Meeting.objects.all().delete()
-    broadcast_meeting_update("Møderum 1")  # Broadcast opdateringer for begge rum
+    broadcast_meeting_update("Møderum 1")
     broadcast_meeting_update("Møderum 2")
     messages.success(request, 'All meetings cleared.')
     return redirect('view_meetings')
@@ -298,12 +270,12 @@ def cleanup_meetings(request):
     #print(f"Current time: {current_time.time()}")
     #print(past_meetings)
 
-    # Debugging: Print meetings to be deleted
+
     logger.info(f"Meetings to delete: {[meeting.id for meeting in past_meetings]}")
 
-    # Count and delete past meetings
+    # Count and delete past meetings for debug
     count = past_meetings.count()
-    room_names = past_meetings.values_list('room', flat=True).distinct()  # Get affected rooms
+    room_names = past_meetings.values_list('room', flat=True).distinct()
     past_meetings.delete()
 
     # Broadcast updates for each room
@@ -314,12 +286,12 @@ def cleanup_meetings(request):
 
 
 def delete_meeting(request, meeting_id):
-    if request.method == 'DELETE':  # Ensure it's a DELETE request
+    if request.method == 'DELETE':
         try:
             # Fetch the meeting by ID
             meeting = get_object_or_404(Meeting, id=meeting_id)
-            room_name = meeting.room  # Save room name for broadcasting
-            meeting.delete()  # Delete the meeting
+            room_name = meeting.room
+            meeting.delete()
 
             # Optionally broadcast an update to refresh data
             broadcast_meeting_update(room_name)

@@ -4,6 +4,7 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>Meetings in {{ room }}</title>
     <script src="{% static 'my_app/js/global.js' %}"></script>
     <script src="{% static 'my_app/js/scroll.js' %}"></script>
@@ -30,7 +31,7 @@
 <body>
     <h1>Meetings in {{ room }}</h1>
 
-    <!-- Listevisning af møder -->
+    <!-- Listview of meetings -->
     <div id="meeting-list">
         {% if meetings %}
             {% for meeting in meetings %}
@@ -47,9 +48,9 @@
         {% endif %}
     </div>
 
-    <!-- Script til at opdatere mødelisten -->
+    <!-- Script to update meeting list -->
     <script>
-        // Hent rumnavnet fra skabelonen
+
         const roomName = "{{ room|escapejs }}";
 
         function fetchMeetings() {
@@ -82,7 +83,7 @@
                 .catch(error => console.error('Error cleaning up meetings:', error));
         }
 
-        // Update meetings and clean up every 5 seconds
+
         setInterval(fetchMeetings, 5000);
 
         // Fetch meetings immediately on page load

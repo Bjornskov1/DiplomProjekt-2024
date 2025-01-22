@@ -23,5 +23,5 @@ class MeetingRoomConsumer(AsyncWebsocketConsumer):
     async def meeting_update(self, event):
         message = event['message']
 
-        # Send besked til WebSocket
+        # Send message til WebSocket
         await self.send(text_data=message)

@@ -19,8 +19,8 @@ p {
     background: #fff;
     padding: 20px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    overflow-y: auto; /* Allow scrolling inside container */
-    -webkit-overflow-scrolling: touch; /* Enable smooth scrolling for touch devices */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Enable smooth scrolling for the touch device */
 }
 
 /* Button Styles */
@@ -104,13 +104,12 @@ a:hover {
     border-radius: 3px;
 }
 
-/* Hide Previous and Next Buttons */
+/* Hide Previous and Next Buttons from date pickr in Booking */
 .ui-datepicker-prev,
 .ui-datepicker-next {
     display: none !important;
 }
 
-/* Tempus Dominus Time Picker Customization */
 .input-group-text {
     background-color: #007BFF;
     color: white;
@@ -179,7 +178,7 @@ a:hover {
     text-align: center;
 }
 
-/* Touchscreen Optimizations */
+/* Touchscreen Optimizations Testcode for display */
 body, html {
     touch-action: pan-y; /* Enable vertical scrolling with touch gestures */
     -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS and mobile devices */

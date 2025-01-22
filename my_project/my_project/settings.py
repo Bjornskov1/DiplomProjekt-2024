@@ -64,6 +64,7 @@ AZURE_TENANT_ID = '4a3f472f-6e15-42f9-8d9f-44654903975f'
 AZURE_SCOPES = ['https://graph.microsoft.com/.default']
 AZURE_EMAIL_ENDPOINT = 'https://graph.microsoft.com/v1.0/me/sendMail'
 
+# Email setup for console
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
@@ -76,7 +77,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    
+
 ]
 
 ROOT_URLCONF = "my_project.urls"
@@ -84,8 +85,8 @@ ROOT_URLCONF = "my_project.urls"
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],  # Leave this empty if you want to rely on app templates.
-        'APP_DIRS': True,  # This should be True
+        'DIRS': [],
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -103,6 +104,7 @@ WSGI_APPLICATION = "my_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# Alwaysdata credentials for database usage
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -152,14 +154,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-#STATICFILES_DIRS = [
-#    os.path.join(BASE_DIR, 'my_app/static')
-#]
-#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'my_app/static')]
-#STATIC_ROOT = '/home/mabj/Documents/ProjectTest/my_project/my_app/static/'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # Whitenoise for static files
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField" # Default primary key field type

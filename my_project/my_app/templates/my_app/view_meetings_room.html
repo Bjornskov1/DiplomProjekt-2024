@@ -44,9 +44,9 @@
         }
 
         /* Scrollable container for the meeting list */
-        #content { /* Updated from #meeting-list to #content */
-            height: 80vh; /* Make the container take up 80% of the viewport height */
-            overflow-y: auto; /* Enable vertical scrolling */
+        #content {
+            height: 80vh;
+            overflow-y: auto;
             padding: 20px;
             box-sizing: border-box;
             background-color: #fff;
@@ -175,7 +175,7 @@
             }
         }
 
-        // Update meetings and clean up every 5 seconds
+
         setInterval(fetchMeetings, 5000);
 
         // Fetch meetings immediately on page load
