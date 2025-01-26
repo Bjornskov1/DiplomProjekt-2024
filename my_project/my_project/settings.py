@@ -20,19 +20,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-((fkgft!04ps8*asyx1630yzqkj2e=9*_m%7*-(06s2v*l5n*^"
+SECRET_KEY = "" #deleted for security
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.252.22', '0.0.0.0', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [] #deleted for security
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://192.168.252.22',  # Internal IP
-    'http://0.0.0.0',         # General wildcard
-    'http://127.0.0.1',       # Localhost (IPv4)
-    'http://localhost',       # Localhost (name)
-]
+CSRF_TRUSTED_ORIGINS = [] #deleted for security
 
 # Application definition
 
@@ -58,9 +53,9 @@ CHANNEL_LAYERS = {
 }
 
 #Azure setup
-AZURE_CLIENT_ID = '016456a3-8023-4c07-a345-3a89c8e3124d'
-AZURE_CLIENT_SECRET = 'z2u8Q~XhEoytFzFP3OpPeJYRwjKQ7nGn.noTRcFi'
-AZURE_TENANT_ID = '4a3f472f-6e15-42f9-8d9f-44654903975f'
+AZURE_CLIENT_ID = '' #deleted for security
+AZURE_CLIENT_SECRET = '' #deleted for security
+AZURE_TENANT_ID = '' #deleted for security
 AZURE_SCOPES = ['https://graph.microsoft.com/.default']
 AZURE_EMAIL_ENDPOINT = 'https://graph.microsoft.com/v1.0/me/sendMail'
 
@@ -105,14 +100,14 @@ WSGI_APPLICATION = "my_project.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # Alwaysdata credentials for database usage
-DATABASES = {
+DATABASES = { #deleted for security
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'initmeeting_db',  # Database name from the image
-        'USER': '379731_mabj',     # Database username
-        'PASSWORD': 'MABJ1337',  # Replace with the actual password
-        'HOST': 'mysql-initmeeting.alwaysdata.net',  # Database host
-        'PORT': '3306',  # MySQL's default port
+        'ENGINE': '',
+        'NAME': '',  # Database name from the image
+        'USER': '',     # Database username
+        'PASSWORD': '',  # Replace with the actual password
+        'HOST': '',  # Database host
+        'PORT': '',  # MySQL's default port
     }
 }
 
